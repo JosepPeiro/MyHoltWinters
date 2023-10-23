@@ -26,21 +26,43 @@ MyHoltWinters <- function(x, alpha = TRUE, beta = TRUE, gamma = TRUE){
     print("The input vector must be a time serie")
     return()
   }
-  #We'll give inital values to alpha beta and gamma because it's difficult to
-  #calculate their real value
-  alpha = 0.5
-  beta = 0.5
-  gamma = 0.5
+  p <- frequency(x)
   
-  #Attributes of the input
-  fr = frequency(x)
-  n = length(x)
+  fun.ajuste <- function(serie, freq, alfa, beta, gamma){
+    
+    n <- length(serie)
+    valfitted <- c()
+    
+    L0 <- sum(serie[1:freq + freq]) / freq
+    T0 <- (sum(serie[1:freq + freq]) - sum(serie[1:freq])) / (freq ^ 2)
+    S0 <- (serie[1:freq + freq] - serie[1:freq]) / freq
+    
+    for (i in (2 * freq + 1):n){
+      S0ind <- i %% freq
+      if (S0ind == 0){S0ind <- freq}
+      pred <- L0 + T0 + S0[S0ind]
+      valfitted <- c(valfitted, pred)
+      
+      L1 <- alpha * (serie[i] - S0[S0ind]) + (1 - alpha) * (L0 + T0)
+      T1 <- beta * (L1 - L0) + (1 - beta) * T0
+      S1 <- gamma * (serie[i] - L1) + (1 - gamma) * S0[S0ind]
+      
+      L0 <- L1
+      T0 <- T1
+      S0[S0ind] <- S1
+    }
+    SE <- (serie[(2 * freq + 1):n] - valfitted) ^ 2
+    ajust <- list(valfitted, SE)
+    return(ajust)
+    
+  }
+  fun.optim <- function(vect, data){
+    n <- length(data)
+    return(fun.ajuste(data[1:(n - 1)], data[n], vect[1], vect[2], vect[3])$SE)
+  }
   
-  #The L0 has to be the last data we train, not the first
-  L0 = x[fr + 1]
-  #For the initial tendence we will use the first observation and the first in
-  #the second periode, divided by the frequency
-  T0 = (x[fr + 1] - x[1]) / fr
+  optimo <- optim(c(0.5, 0.5, 0.5), fun.optim, data = c(x, p), method = "L-BFGS-B", 
+        lower = c(0.001, 0.001, 0.001), upper = c(0.999, 0.999, 0.999))
 }
 
 MyHoltWinters(st_simulated)
@@ -51,3 +73,4 @@ mod$beta
 mod$gamma
 predict(mod, 5)
 plot(mod)
+freq = 12

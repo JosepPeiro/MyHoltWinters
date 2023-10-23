@@ -4,7 +4,7 @@ set.seed(99183992)
 sequence_math <- 10 * (cos(seq(0,12 * pi, pi/6))) + sqrt(seq(0,12 * pi, pi/6))
 sequence_sim <- sequence_math + rnorm(length(sequence_math), 0, 2)
 st_simulated <- ts(sequence_sim, frequency = 12, start = c(2000, 1))
-plot(st_simulated)
+#plot(st_simulated)
 
 #Also the data from the exam of last year
 ferrocarril <- c(
@@ -51,26 +51,30 @@ MyHoltWinters <- function(x, alpha = TRUE, beta = TRUE, gamma = TRUE){
       T0 <- T1
       S0[S0ind] <- S1
     }
-    SE <- (serie[(2 * freq + 1):n] - valfitted) ^ 2
-    ajust <- list(valfitted, SE)
+    SE <- sum((serie[(2 * freq + 1):n] - valfitted) ^ 2)
+    ajust <- list(valfitted = valfitted, SE = SE)
     return(ajust)
     
   }
   fun.optim <- function(vect, data){
     n <- length(data)
-    return(fun.ajuste(data[1:(n - 1)], data[n], vect[1], vect[2], vect[3])$SE)
+    aj <- fun.ajuste(data[1:(n - 1)], data[n], vect[1], vect[2], vect[3])
+    print(aj$SE)
+    return(aj$SE)
   }
   
-  optimo <- optim(c(0.5, 0.5, 0.5), fun.optim, data = c(x, p), method = "L-BFGS-B", 
+  optimo <- optim(rep(0.1, 3), fun.optim, NULL, data = c(x, p), method = "L-BFGS-B", 
         lower = c(0.001, 0.001, 0.001), upper = c(0.999, 0.999, 0.999))
+  
+  print(optimo)
 }
 
 MyHoltWinters(st_simulated)
-mod<-HoltWinters(st_simulated)
-mod$coefficients
-mod$alpha
-mod$beta
-mod$gamma
-predict(mod, 5)
-plot(mod)
-freq = 12
+# mod<-HoltWinters(st_simulated)
+# mod$coefficients
+# mod$alpha
+# mod$beta
+# mod$gamma
+# predict(mod, 5)
+# plot(mod)
+# freq = 12

@@ -26,7 +26,6 @@ MyHoltWinters <- function(x, alpha = TRUE, beta = TRUE, gamma = TRUE){
     print("The input vector must be a time serie")
     return()
   }
-  p <- frequency(x)
   
   fun.ajuste <- function(serie, freq, alfa, beta, gamma){
     
@@ -35,11 +34,13 @@ MyHoltWinters <- function(x, alpha = TRUE, beta = TRUE, gamma = TRUE){
     
     L0 <- sum(serie[1:freq + freq]) / freq
     T0 <- (sum(serie[1:freq + freq]) - sum(serie[1:freq])) / (freq ^ 2)
-    S0 <- (serie[1:freq + freq] - serie[1:freq]) / freq
+    S0 <- (serie[1:freq + freq] - L0)
     
     for (i in (2 * freq + 1):n){
+      
       S0ind <- i %% freq
       if (S0ind == 0){S0ind <- freq}
+
       pred <- L0 + T0 + S0[S0ind]
       valfitted <- c(valfitted, pred)
       
@@ -51,25 +52,31 @@ MyHoltWinters <- function(x, alpha = TRUE, beta = TRUE, gamma = TRUE){
       T0 <- T1
       S0[S0ind] <- S1
     }
+    
     SE <- sum((serie[(2 * freq + 1):n] - valfitted) ^ 2)
     ajust <- list(valfitted = valfitted, SE = SE)
     return(ajust)
     
   }
   fun.optim <- function(vect, data){
+    print(vect)
     n <- length(data)
     aj <- fun.ajuste(data[1:(n - 1)], data[n], vect[1], vect[2], vect[3])
     print(aj$SE)
     return(aj$SE)
   }
   
-  optimo <- optim(rep(0.1, 3), fun.optim, NULL, data = c(x, p), method = "L-BFGS-B", 
-        lower = c(0.001, 0.001, 0.001), upper = c(0.999, 0.999, 0.999))
+  p <- frequency(x)
+
+  optimo <- optim(c(0.5,0.5,0.5), fun.optim, data = c(x, p), method = "L-BFGS-B", 
+                  lower = c(0, 0, 0), upper = c(1, 1, 1))
   
   print(optimo)
 }
 
+#MyHoltWinters(ts(ferrocarril))
 MyHoltWinters(st_simulated)
+
 # mod<-HoltWinters(st_simulated)
 # mod$coefficients
 # mod$alpha

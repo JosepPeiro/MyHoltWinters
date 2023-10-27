@@ -21,9 +21,28 @@ MyHoltWinters <- function(x, alpha = TRUE, beta = TRUE, gamma = TRUE){
     print("The input vector must be a time serie")
     return()
   }
-  optimizer(x)
-}  
+  solution <- list()
+  p <- frequency(x)
+  optimo <- optim(rep(0.5,3), fun.optim, data = c(x, p), method = "L-BFGS-B", 
+                  lower = c(0.00, 0.00, 0.00), upper = c(0.999, 0.999, 0.999))
   
+  ajuste <- fun.ajuste(x, p, optimo$par[1], optimo$par[2], optimo$par[3])
+  plot(x)
+  lines(ts(c(rep(NA, 2 * p), ajuste$valfitted),
+           start = start(x), frequency = frequency(x)),
+        type = "l", lty=2, col = "red")
+  
+  names(optimo$par) <- c('alpha', 'beta', 'gamma')
+  
+  solution$x <- x
+  solution$fitted <- ajuste$valfitted
+  solution$parameters <- optimo$par
+  solution$coefficients <- ajuste$coef
+  solution$SSE <- ajuste$SE
+  
+  return(solution)
+}
+
   
 fun.ajuste <- function(serie, freq, alpha, beta, gamma){
   
@@ -52,7 +71,9 @@ fun.ajuste <- function(serie, freq, alpha, beta, gamma){
   }
   
   SE <- sum((serie[(2 * freq + 1):n] - valfitted) ^ 2)
-  ajust <- list(valfitted = valfitted, SE = SE)
+  coefficients <- c(L0, T0, S0)
+  names(coefficients) <- c('Level', 'Tendency', paste('Season', 1:freq))
+  ajust <- list(valfitted = valfitted, SE = SE, coef = coefficients)
   return(ajust)
   
 }
@@ -64,7 +85,7 @@ fun.optim <- function(vect, data){
   return(aj$SE)
 }
   
-optimizer2 <- function(x){
+optimizer <- function(x){
   p <- frequency(x)
   value_vector <- c()
   best_value <- Inf
@@ -80,33 +101,20 @@ optimizer2 <- function(x){
         if (optimo$value < best_value){
           best_value <- optimo$value
           best_par <- optimo$par
-          print("Iter")
-          print(best_value)
-          print(best_par)
         }
       }
     }
   }
-}
-
-optimizer <- function(x){
-  p <- frequency(x)
-  value_vector <- c()
-  best_value <- Inf
-  par_matrix <- matrix(ncol = 3)
-  best_par <- NULL
-  optimo <- optim(rep(0.5,3), fun.optim, data = c(x, p), method = "L-BFGS-B", 
-                  lower = c(0.001, 0.001, 0.001), upper = c(0.999, 0.999, 0.999))
-  par_matrix <- rbind(par_matrix, optimo$par)
-  value_vector <- c(value_vector, optimo$value)
-  print(optimo)
+  best_solution <- list(value = best_value,
+                        par = best_par)
+  return(best_solution)
 }
 
 # First we simulate a time serie that will be used for proves
-sequence_math <- 10 * (cos(seq(0,12 * pi, pi/6))) + seq(0,12 * pi, pi/6) + 10 * sin(seq(0, pi, pi / 12 / 6))
+sequence_math <- 10 * (cos(seq(0,24 * pi, pi/6))) + seq(0,24 * pi, pi/6) + 10 * sin(seq(0, pi, pi / 24 / 6))
 sequence_sim <- sequence_math + rnorm(length(sequence_math), 0, 2)
 st_simulated <- ts(sequence_sim, frequency = 12, start = c(2000, 1))
-plot(st_simulated)
+#plot(st_simulated)
 
 #MyHoltWinters(ts(ferrocarril))
 
@@ -120,11 +128,13 @@ mod$gamma
 # plot(mod)
 # freq = 12
 
-# Bucle
-# Comparar con Holtwinters
-# Representar
+# Bucle Ok
+# Comparar con Holtwinters Ok
+# Representar Ok
 
 
-MyHoltWinters(st_simulated)
-
-#ajuste_f <- fun.ajuste(st_simulated, p, best_par[1], best_par[2], best_par[3])
+Mymodelo <- MyHoltWinters(st_simulated)
+Mymodelo$parameters
+Mymodelo$coefficients
+Mymodelo$SSE
+mod$SSE

@@ -77,8 +77,7 @@ fun.ajuste <- function(serie, freq, alpha, beta, gamma){
   coefficients <- c(L0, T0, S0)
   names(coefficients) <- c('Level', 'Tendency', paste('Season', 1:freq))
   
-  ajust <- list(valfitted = valfitted, SE = SE, coef = coefficients,
-                fitted = fitted)
+  ajust <- list(valfitted = valfitted, SE = SE, coef = coefficients, fitted = fitted)
   return(ajust)
 }
 

@@ -1,4 +1,5 @@
-MyHoltWinters <- function(x, alpha = TRUE, beta = TRUE, gamma = TRUE){
+MyHoltWinters <- function(x, alpha = TRUE, beta = TRUE, gamma = TRUE,
+                          optimum = FALSE){
   if (!is.ts(x)){
     print("The input vector must be a time serie")
     return()
@@ -16,8 +17,13 @@ MyHoltWinters <- function(x, alpha = TRUE, beta = TRUE, gamma = TRUE){
   
   solution <- list()
   p <- frequency(x)
+  
+  if (optimum){
+    optimo <- optimizer(x)
+  }else{
   optimo <- optim(initial, fun.optim, data = c(x, p), method = "L-BFGS-B", 
                   lower = c(0.00, 0.00, 0.00), upper = c(1, 1, 1))
+  }
   
   ajuste <- fun.ajuste(x, p, optimo$par[1], optimo$par[2], optimo$par[3])
   plot(x)
@@ -98,7 +104,7 @@ optimizer <- function(x){
     for (b in seq(0.1, 0.9, by = 0.1)){
       for (c in seq(0.1, 0.9, by = 0.1)){
         optimo <- optim(c(a,b,c), fun.optim, data = c(x, p), method = "L-BFGS-B", 
-                        lower = c(0.001, 0.001, 0.001), upper = c(0.999, 0.999, 0.999))
+                        lower = c(0, 0, 0), upper = c(1, 1, 1))
         par_matrix <- rbind(par_matrix, optimo$par)
         value_vector <- c(value_vector, optimo$value)
         if (optimo$value < best_value){

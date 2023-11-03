@@ -50,22 +50,22 @@ Mymodelo.par$parameters
 
 mape_Mymodelo <- 100*mean(abs(st_simulated-Mymodelo$fitted[,1])/st_simulated)
 mape_mod <- 100*mean(abs(st_simulated-mod$fitted[,1])/st_simulated)
-mape_Mymodelo
-mape_mod
 rmse_Mymodelo <- sqrt(mean((st_simulated-Mymodelo$fitted[,1])^2))
 rmse_mod <- sqrt(mean((st_simulated-mod$fitted[,1])^2))
-rmse_Mymodelo
-rmse_mod
 
-n <- length(st_simulated)
-st_simulated_reduced <- ts(st_simulated[-((n + 1 - frequency(st_simulated)):n)],
-                           frequency = 12, start = c(2000, 1))
+
 
 #Quitar los c primeros valores:
-mod_reduced <- HoltWinters(st_simulated_reduced)
-mape_mod_red <- 100*mean(abs(st_simulated-mod_reduced$fitted[,1])/st_simulated)
-rmse_mod_red <- sqrt(mean((st_simulated-mod_reduced$fitted[,1])^2))
+st_red <- window(mod$fitted, start = c(start(mod$fitted)[1] + 1,start(mod$fitted)[2]))
+mape_mod_red <- 100*mean(abs(st_simulated-st_red[,1])/st_simulated)
+rmse_mod_red <- sqrt(mean((st_simulated-st_red[,1])^2))
+
+mape_Mymodelo
+mape_mod
 mape_mod_red
+
+rmse_Mymodelo
+rmse_mod
 rmse_mod_red
 
 
@@ -84,3 +84,5 @@ Mymodelofer$parameters
 
 Mymodelo.par.fer <- MyHoltWinters(ferro, modfer$alpha,modfer$beta,modfer$gamma)
 Mymodelo.par$parameters
+
+#best_Mymodelo <- MyHoltWinters(st_simulated, optimum = T)

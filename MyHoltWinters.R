@@ -17,7 +17,7 @@ MyHoltWinters <- function(x, alpha = TRUE, beta = TRUE, gamma = TRUE){
   solution <- list()
   p <- frequency(x)
   optimo <- optim(initial, fun.optim, data = c(x, p), method = "L-BFGS-B", 
-                  lower = c(0.00, 0.00, 0.00), upper = c(0.999, 0.999, 0.999))
+                  lower = c(0.00, 0.00, 0.00), upper = c(1, 1, 1))
   
   ajuste <- fun.ajuste(x, p, optimo$par[1], optimo$par[2], optimo$par[3])
   plot(x)

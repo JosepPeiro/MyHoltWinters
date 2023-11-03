@@ -35,17 +35,18 @@ mod$gamma
 # Comparar con Holtwinters Ok
 # Representar Ok
 
+#Quitar los c primeros valores Ok
+#Comparar con los parametros de holtwinters -> No pasa nada, vuelve a los que ya tenia Ok
+#Mirar la otra serie Ok
 
 Mymodelo <- MyHoltWinters(st_simulated)
 Mymodelo$coefficients
 Mymodelo$parameters
 
+#Comparar con los parametros de holtwinters
 Mymodelo.par <- MyHoltWinters(st_simulated, mod$alpha,mod$beta,mod$gamma)
 Mymodelo.par$parameters
 
-#Quitar los c primeros valores Ok
-#Comparar con los parametros de holtwinters -> No pasa nada, vuelve a los que ya tenia Ok
-#Mirar la otra serie Ok
 
 mape_Mymodelo <- 100*mean(abs(st_simulated-Mymodelo$fitted[,1])/st_simulated)
 mape_mod <- 100*mean(abs(st_simulated-mod$fitted[,1])/st_simulated)
@@ -60,8 +61,26 @@ n <- length(st_simulated)
 st_simulated_reduced <- ts(st_simulated[-((n + 1 - frequency(st_simulated)):n)],
                            frequency = 12, start = c(2000, 1))
 
+#Quitar los c primeros valores:
 mod_reduced <- HoltWinters(st_simulated_reduced)
 mape_mod_red <- 100*mean(abs(st_simulated-mod_reduced$fitted[,1])/st_simulated)
 rmse_mod_red <- sqrt(mean((st_simulated-mod_reduced$fitted[,1])^2))
 mape_mod_red
 rmse_mod_red
+
+
+###############################################
+###############Ferrocarril#####################
+###############################################
+
+modfer<-HoltWinters(ferro)
+plot(modfer)
+modfer$alpha
+modfer$beta
+modfer$gamma
+
+Mymodelofer <- MyHoltWinters(ferro)
+Mymodelofer$parameters
+
+Mymodelo.par.fer <- MyHoltWinters(ferro, modfer$alpha,modfer$beta,modfer$gamma)
+Mymodelo.par$parameters

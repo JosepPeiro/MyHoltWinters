@@ -1,10 +1,6 @@
 # MyHoltWinters
 
 ## Author: Josep Peiró Ramos
-#### As a student at Universitat de València
-
-
-
 
 This project was proposed as an optional exercise for a better understanding of how HoltWinters algorithm works.
 
